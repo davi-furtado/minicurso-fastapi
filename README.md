@@ -195,8 +195,7 @@ No FastAPI:
 
 ```python
 @app.get("/tarefas/{id}")
-def buscar_tarefa(id: int):
-    ...
+def buscar_tarefa(id: int): ...
 ```
 
 O FastAPI utiliza a anotação `int` para entender que o parâmetro `id` deve ser um número inteiro.
@@ -225,8 +224,7 @@ GET /tarefas/{id}
 
 ```python
 @app.get("/tarefas/{id}")
-def buscar_tarefa(id: int):
-    ...
+def buscar_tarefa(id: int): ...
 ```
 
 #### Criar uma tarefa
@@ -237,8 +235,7 @@ POST /tarefas
 
 ```python
 @app.post("/tarefas", status_code=201)
-def criar_tarefa(tarefa: Tarefa):
-    ...
+def criar_tarefa(tarefa: Tarefa): ...
 ```
 
 #### Atualizar uma tarefa
@@ -269,8 +266,7 @@ Endpoint:
 
 ```python
 @app.patch("/tarefas/{id}")
-def atualizar_tarefa(id: int, dados: TarefaPatch):
-    ...
+def atualizar_tarefa(id: int, dados: TarefaPatch): ...
 ```
 
 #### Excluir uma tarefa
@@ -281,8 +277,7 @@ DELETE /tarefas/{id}
 
 ```python
 @app.delete("/tarefas/{id}", status_code=204)
-def excluir_tarefa(id: int):
-    ...
+def excluir_tarefa(id: int): ...
 ```
 
 ### 8. Status HTTP e tratamento de erros
@@ -303,10 +298,7 @@ from fastapi import HTTPException
 Exemplo:
 
 ```python
-raise HTTPException(
-    status_code=404,
-    detail="Tarefa não encontrada"
-)
+raise HTTPException(status_code=404, detail="Tarefa não encontrada")
 ```
 
 ### 9. Documentação automática

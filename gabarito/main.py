@@ -1,6 +1,7 @@
+from json import dump, load
+
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
-from json import load, dump
 
 app = FastAPI(
     title="API de Tarefas",

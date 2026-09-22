@@ -29,7 +29,7 @@ def listar_tarefas():
 
         for tarefa in tarefas:
             status = "✓" if tarefa["concluida"] else " "
-            print(f'{tarefa["id"]}. [{status}] {tarefa["titulo"]}')
+            print(f"{tarefa['id']}. [{status}] {tarefa['titulo']}")
     else:
         print("Erro:", response.text)
 

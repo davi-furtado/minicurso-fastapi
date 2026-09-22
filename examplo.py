@@ -1,15 +1,16 @@
 """Exemplo simples de consumo de uma API externa."""
 
-from requests import get
+from datetime import datetime, timedelta, timezone
 from json import dumps
-from datetime import date, timedelta
+
+from requests import get
 
 moeda = input("Digite o código ISO da moeda (ex: USD, EUR, BGP): ").strip().upper()
 data = input(
     "Digite a data de referência [AAAA-MM-DD] ou deixe vazio para data de ontem: "
 ).strip()
 if not data:
-    data = date.today() - timedelta(days=1)
+    data = datetime.now(tz=timezone.utc).astimezone().date() - timedelta(days=1)
 
 # Documentação da API: https://brasilapi.com.br/docs
 url = f"https://brasilapi.com.br/api/cambio/v1/cotacao/{moeda}/{data}"
