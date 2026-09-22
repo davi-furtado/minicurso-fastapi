@@ -10,15 +10,15 @@ Depois, em outro terminal:
     python tarefas.py
 """
 
-import requests
+import httpx
 
 API_URL = "http://localhost:8000"
 
 
 def listar_tarefas():
-    response = requests.get(f"{API_URL}/tarefas")
+    response = httpx.get(f"{API_URL}/tarefas")
 
-    if response.ok:
+    if response.is_success:
         tarefas = response.json()
 
         print("\n--- Tarefas ---")
@@ -42,7 +42,7 @@ def criar_tarefa():
         "concluida": False,
     }
 
-    response = requests.post(
+    response = httpx.post(
         f"{API_URL}/tarefas",
         json=dados,
     )
@@ -57,9 +57,9 @@ def criar_tarefa():
 def buscar_tarefa():
     id_tarefa = input("ID da tarefa: ")
 
-    response = requests.get(f"{API_URL}/tarefas/{id_tarefa}")
+    response = httpx.get(f"{API_URL}/tarefas/{id_tarefa}")
 
-    if response.ok:
+    if response.is_success:
         print(response.json())
     else:
         print("Erro:", response.text)
@@ -86,12 +86,12 @@ def atualizar_tarefa():
         print("Opção inválida.")
         return
 
-    response = requests.patch(
+    response = httpx.patch(
         f"{API_URL}/tarefas/{id_tarefa}",
         json=dados,
     )
 
-    if response.ok:
+    if response.is_success:
         print("Tarefa atualizada!")
         print(response.json())
     else:
@@ -101,7 +101,7 @@ def atualizar_tarefa():
 def excluir_tarefa():
     id_tarefa = input("ID da tarefa: ")
 
-    response = requests.delete(f"{API_URL}/tarefas/{id_tarefa}")
+    response = httpx.delete(f"{API_URL}/tarefas/{id_tarefa}")
 
     if response.status_code == 204:
         print("Tarefa excluída!")

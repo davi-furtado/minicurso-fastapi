@@ -1,0 +1,16 @@
+[project]
+name = "minicurso-fastapi"
+version = "1.0.0"
+description = "Curso de FastAPI básico"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.13"
+
+dependencies = [
+    "fastapi[standard]>=0.141.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.8",
+]
