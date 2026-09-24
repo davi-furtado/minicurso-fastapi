@@ -8,17 +8,19 @@ app = FastAPI(
     version="1.0.0",
 )
 
+LOCAL_JSON = "../tarefas.json"
+
 
 def carregar_tarefas():
     try:
-        with open("../tarefas.json", "r", encoding="utf-8") as arquivo:
+        with open(LOCAL_JSON, "r", encoding="utf-8") as arquivo:
             return load(arquivo)
     except (FileNotFoundError, JSONDecodeError):
         return []
 
 
 def salvar_tarefas(tarefas):
-    with open("../tarefas.json", "w", encoding="utf-8") as arquivo:
+    with open(LOCAL_JSON, "w", encoding="utf-8") as arquivo:
         dump(tarefas, arquivo, indent=2, ensure_ascii=False)
 
 

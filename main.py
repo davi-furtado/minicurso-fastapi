@@ -16,10 +16,11 @@
 # ==============================================================================
 # 3. FUNÇÕES AUXILIARES DE PERSISTÊNCIA (LEITURA E ESCRITA)
 # ==============================================================================
+LOCAL_JSON = "tarefas.json"
 
 
 def carregar_tarefas():
-    # Abra o arquivo "../tarefas.json" em modo de leitura com encoding="utf-8"
+    # Abra o arquivo LOCAL_JSON em modo de leitura com encoding="utf-8"
     # Trate com try/except as exceções FileNotFoundError e JSONDecodeError
     # Se o arquivo for lido com sucesso, retorne o JSON carregado (load)
     # Se der erro, retorne uma lista vazia []
@@ -27,7 +28,7 @@ def carregar_tarefas():
 
 
 def salvar_tarefas(tarefas):
-    # Abra o arquivo "../tarefas.json" em modo de escrita ("w") com encoding="utf-8"
+    # Abra o arquivo LOCAL_JSON em modo de escrita ("w") com encoding="utf-8"
     # Use o dump para salvar a lista de tarefas no arquivo (com indent=2 e ensure_ascii=False)
     pass
 
