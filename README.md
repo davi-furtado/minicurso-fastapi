@@ -2,7 +2,7 @@
 
 # FastAPI
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge\&logo=python\&logoColor=ffdd54)
 
 _Construindo uma API REST na prática_
 
@@ -26,12 +26,11 @@ Antes de iniciar o minicurso, é necessário ter instalado as seguintes ferramen
 ### 📦 Bibliotecas Python
 
 - `fastapi[standard]`
-- `requests`
 
 As bibliotecas podem ser instaladas utilizando:
 
 ```bash
-pip install -r requirements.txt
+pip install .
 ```
 
 ---
@@ -74,7 +73,7 @@ E uma possível resposta:
 
 Antes de criar nossa própria API, vamos consumir uma API já existente.
 
-Neste exemplo será utilizada a **[BrasilAPI](https://brasilapi.com.br)**, consultando cotações de moedas.
+Neste exemplo será utilizada a **BrasilAPI**, consultando informações da tabela FIPE.
 
 Arquivo:
 
@@ -124,11 +123,100 @@ Para executar a aplicação:
 fastapi dev main.py
 ```
 
-### 4. Criando nossa primeira API
+### 4. CORS e comunicação com o frontend
+
+Quando uma API é consumida por uma aplicação web, o navegador possui regras de segurança para requisições entre origens diferentes.
+
+Por exemplo, imagine:
+
+```text
+Frontend
+localhost:5173
+      │
+      │ GET /tarefas
+      ▼
+API
+localhost:8000
+```
+
+Apesar de estarem no mesmo computador, `localhost:5173` e `localhost:8000` são origens diferentes porque utilizam portas diferentes.
+
+O **CORS (Cross-Origin Resource Sharing)** permite configurar quais origens podem realizar requisições para a API através do navegador.
+
+No FastAPI podemos utilizar o `CORSMiddleware`:
+
+```python
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+#### `allow_origins`
+
+```python
+allow_origins=["*"]
+```
+
+O `*` permite requisições vindas de qualquer origem.
+
+Para uma aplicação real, podemos restringir as origens permitidas:
+
+```python
+allow_origins=[
+    "http://localhost:5173"
+]
+```
+
+#### `allow_methods`
+
+```python
+allow_methods=["*"]
+```
+
+Permite todos os métodos HTTP, como:
+
+- `GET`
+- `POST`
+- `PATCH`
+- `DELETE`
+
+#### `allow_headers`
+
+```python
+allow_headers=["*"]
+```
+
+Permite diferentes cabeçalhos HTTP enviados pelo cliente.
+
+#### `allow_credentials`
+
+```python
+allow_credentials=True
+```
+
+Permite o uso de credenciais em requisições cross-origin, como cookies.
+
+> **Importante:** CORS não é autenticação. Ele controla quais origens podem realizar requisições através do navegador. Não impede que alguém faça uma requisição diretamente utilizando ferramentas como `curl`, Python ou Postman.
+
+No minicurso, utilizaremos `allow_origins=["*"]` para facilitar os testes. Em aplicações reais, é recomendado definir explicitamente as origens permitidas.
+
+### 5. Criando nossa primeira API
 
 Durante o minicurso será construída uma API de tarefas.
 
-Inicialmente teremos uma lista em memória:
+As tarefas serão armazenadas em um arquivo JSON:
+
+```text
+tarefas.json
+```
+
+Inicialmente podemos criar uma lista vazia:
 
 ```python
 tarefas = []
@@ -139,7 +227,7 @@ Depois criaremos nosso primeiro endpoint:
 ```python
 @app.get("/tarefas")
 def listar_tarefas():
-    return tarefas
+    return carregar_tarefas()
 ```
 
 A rota poderá ser acessada através de:
@@ -148,38 +236,13 @@ A rota poderá ser acessada através de:
 GET /tarefas
 ```
 
-### 5. Criando modelos com Pydantic
-
-Para definir e validar os dados recebidos pela API, utilizaremos o Pydantic.
-
-```python
-from pydantic import BaseModel
-```
-
-Criando o modelo de uma tarefa:
-
-```python
-class Tarefa(BaseModel):
-    titulo: str
-    concluida: bool = False
-```
-
-Agora podemos utilizar esse modelo para receber dados:
-
-```python
-@app.post("/tarefas")
-def criar_tarefa(tarefa: Tarefa):
-    return tarefa
-```
-
-Exemplo de JSON enviado:
+Se não houver tarefas, a API pode retornar uma lista vazia:
 
 ```json
-{
-  "titulo": "Estudar FastAPI",
-  "concluida": false
-}
+[]
 ```
+
+Nesse caso, continuamos utilizando `200 OK`, pois a requisição foi processada corretamente e a coleção simplesmente não possui itens.
 
 ### 6. Parâmetros de rota
 
@@ -195,7 +258,8 @@ No FastAPI:
 
 ```python
 @app.get("/tarefas/{id}")
-def buscar_tarefa(id: int): ...
+def buscar_tarefa(id: int):
+    ...
 ```
 
 O FastAPI utiliza a anotação `int` para entender que o parâmetro `id` deve ser um número inteiro.
@@ -213,7 +277,7 @@ GET /tarefas
 ```python
 @app.get("/tarefas")
 def listar_tarefas():
-    return tarefas
+    return carregar_tarefas()
 ```
 
 #### Buscar uma tarefa
@@ -224,7 +288,14 @@ GET /tarefas/{id}
 
 ```python
 @app.get("/tarefas/{id}")
-def buscar_tarefa(id: int): ...
+def buscar_tarefa(id: int):
+    ...
+```
+
+Se a tarefa não existir, retornaremos:
+
+```http
+404 Not Found
 ```
 
 #### Criar uma tarefa
@@ -235,8 +306,18 @@ POST /tarefas
 
 ```python
 @app.post("/tarefas", status_code=201)
-def criar_tarefa(tarefa: Tarefa): ...
+def criar_tarefa(titulo: str, concluida: bool = False):
+    ...
 ```
+
+Exemplo:
+
+```text
+titulo = "Estudar FastAPI"
+concluida = false
+```
+
+O servidor criará um ID para a nova tarefa e salvará os dados no arquivo `tarefas.json`.
 
 #### Atualizar uma tarefa
 
@@ -246,27 +327,24 @@ PATCH /tarefas/{id}
 
 O `PATCH` será utilizado para atualizar parcialmente uma tarefa.
 
-Exemplo:
+Podemos, por exemplo, alterar somente o status:
 
-```json
-{
-  "concluida": true
-}
+```text
+PATCH /tarefas/1
 ```
 
-Modelo:
+Ou somente o título.
 
-```python
-class TarefaPatch(BaseModel):
-    titulo: str | None = None
-    concluida: bool | None = None
-```
-
-Endpoint:
+O endpoint utilizado no projeto será:
 
 ```python
 @app.patch("/tarefas/{id}")
-def atualizar_tarefa(id: int, dados: TarefaPatch): ...
+def atualizar_tarefa(
+    id: int,
+    titulo: str | None = None,
+    concluida: bool | None = None
+):
+    ...
 ```
 
 #### Excluir uma tarefa
@@ -277,10 +355,46 @@ DELETE /tarefas/{id}
 
 ```python
 @app.delete("/tarefas/{id}", status_code=204)
-def excluir_tarefa(id: int): ...
+def excluir_tarefa(id: int):
+    ...
 ```
 
-### 8. Status HTTP e tratamento de erros
+### 8. Armazenamento das tarefas
+
+Para manter o projeto simples, as tarefas serão armazenadas em um arquivo JSON.
+
+Arquivo:
+
+```text
+tarefas.json
+```
+
+Para carregar as tarefas:
+
+```python
+from json import load
+
+def carregar_tarefas():
+    try:
+        with open("../tarefas.json", "r") as arquivo:
+            return load(arquivo)
+    except FileNotFoundError:
+        return []
+```
+
+Para salvar:
+
+```python
+from json import dump
+
+def salvar_tarefas(tarefas):
+    with open("../tarefas.json", "w") as arquivo:
+        dump(tarefas, arquivo, indent=2, ensure_ascii=False)
+```
+
+Assim, as tarefas continuam disponíveis mesmo depois que o servidor for reiniciado.
+
+### 9. Status HTTP e tratamento de erros
 
 Durante a implementação do CRUD serão apresentados alguns dos principais códigos de status HTTP.
 
@@ -298,10 +412,13 @@ from fastapi import HTTPException
 Exemplo:
 
 ```python
-raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+raise HTTPException(
+    status_code=404,
+    detail="Tarefa não encontrada"
+)
 ```
 
-### 9. Documentação automática
+### 10. Documentação automática
 
 Uma das principais características do FastAPI é a geração automática da documentação da API.
 
@@ -321,7 +438,7 @@ Também temos:
 
 que disponibiliza uma segunda interface de documentação.
 
-### 10. Testando a API
+### 11. Testando a API
 
 Durante o minicurso, os endpoints poderão ser testados através da documentação automática do FastAPI.
 
@@ -349,7 +466,7 @@ python tarefas.py
 
 A API precisa estar executando em outro terminal.
 
-### 11. Estrutura do projeto
+### 12. Estrutura do projeto
 
 ```text
 minicurso-fastapi/
@@ -365,7 +482,7 @@ minicurso-fastapi/
     └── main.py
 ```
 
-### 12. O que aprendemos
+### 13. O que aprendemos
 
 Ao final do minicurso, teremos visto:
 
@@ -379,8 +496,7 @@ Ao final do minicurso, teremos visto:
 - FastAPI
 - Rotas
 - Parâmetros de rota
-- Pydantic
-- Validação de dados
+- CORS
 - CRUD
 - `GET`
 - `POST`
@@ -390,6 +506,7 @@ Ao final do minicurso, teremos visto:
 - Tratamento de erros
 - Swagger
 - ReDoc
+- Armazenamento em JSON
 
 ---
 
@@ -412,11 +529,11 @@ Esses assuntos ficam fora do escopo deste minicurso.
 ## 📄 Arquivos
 
 | Arquivo | Descrição |
-| --- | --- |
+| ------------------ | ---------------------------------------------------- |
 | `example.py` | Exemplo de consumo de uma API externa |
 | `tarefas.py` | Interface de terminal para consumir a API de tarefas |
 | `tarefas.json` | Arquivo de armazenamento das tarefas |
-| `main.py` | Arquivo vazio para iniciar o desenvolvimento da API |
+| `main.py` | Arquivo para iniciar o desenvolvimento da API |
 | `gabarito/main.py` | API completa desenvolvida durante o minicurso |
 | `requirements.txt` | Dependências do projeto |
 
